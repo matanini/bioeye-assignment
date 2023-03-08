@@ -5,21 +5,19 @@
 
 Controller::Controller(const long long sec) 
 {
-	frames_processed_since_last_interval = 0;
-	total_frames = 0;
-	eyes_counter = 0;
+	frames_processed_since_last_interval = total_frames = eyes_counter = 0;
 	print_fps_interval = sec;
-	
 }
 
 Controller::~Controller()
 {
+	// close the csv file when destructed
 	file_handler.close_file();
-
 }
 
 void Controller::init()
 {
+	// video capture initialization
 	cap = cv::VideoCapture(0);
 	if (!cap.isOpened()) {
 		std::cerr << "Failed to open video stream." << std::endl;
@@ -30,72 +28,89 @@ void Controller::init()
 
 void Controller::main_loop(const int target_fps)
 {
-	cv::Mat frame;
-	std::map<int, cv::Mat> map;
-	bool achieved_target_fps = false;
+	std::cout << "Starting main loop with target fps:" << target_fps << std::endl;
 
+	// declare lambda function to run in the processor thread
 	const auto w = [this]
 	{
-		processQueue();
+		process_queue();
 	};
-	std::thread frame_processor(w);
+	std::thread frame_processor_thread(w);
 
+
+	cv::Mat frame;
+	prev_time = std::chrono::high_resolution_clock::now();
+
+	// main loop 
 	while (true)
 	{
+		//calculate fps each frame
 		calculate_fps();
 
+		// read the frame
 		cap.read(frame);
 		if (frame.empty()) {
 			std::cerr << "Failed to read frame from video stream." << std::endl;
 			break;
 		}
+		
+		// show the frames 
 		imshow("Video Stream", frame);
 
+		// if target fps is greater than processing fps
+		if (fps < target_fps)
+		{
+			queue.push(frame);
+			frames_processed_since_last_interval++;
+			total_frames++;
+		}
 
-		queue.push(frame);
-		
-		//if (fps < target_fps)
-		//{
-		//	if (!achieved_target_fps && total_frames > 60)
-		//	{
-		//		// After 2 seconds, if cant achieve target_fps, push to map and process later.
-		//		//map.insert({ total_frames, frame});
-		//		std::cout << "here" << std::endl;
-		//	}
 
-		//	else
-		//	{
-		//		process_frame(frame);
-		//	}
-		//	frames_processed_since_last_interval++;
-		//}
-		//if (fps >= target_fps && total_frames > 60)
-		//{
-		//	// achieved target fps
-		//	achieved_target_fps = true;
-		//}
-
-		total_frames++;
-
-		// Check for user input to quit
+		// Check for esc key to quit
 		if (cv::waitKey(1) == 27) {
 			file_handler.close_file();
 			break;
 		}
 	}
 
+	// flag for processing thread
 	finished_capture = true;
 
-	
 
 	// Clean up
 	cap.release();
 	cv::destroyAllWindows();
 
-	frame_processor.join();
+	// wait for processor thread to finish
+	frame_processor_thread.join();
 	
 }
 
+/***
+ * Function to run in a second thread.
+ * Consuming frames from the queue and process them.
+ */
+void Controller::process_queue()
+{
+	std::cout << "Processing thread came alive" << std::endl;
+	while (true) {
+		// pop next frame from the queue
+		const cv::Mat next_frame = queue.pop();
+
+		// process the frame
+		process_frame(next_frame);
+
+		// stop the loop if finished capture and queue is empty
+		if (finished_capture && queue.is_empty())	break;
+
+	}
+	std::cout << "Processing thread is finished" << std::endl;
+}
+
+/***
+ * Processing the frame.
+ * @param input_frame src.
+ */
 void Controller::process_frame(const cv::Mat& input_frame)
 {
 	// extract 2 eye cv::Mat in a vector and measure performance
@@ -108,6 +123,7 @@ void Controller::process_frame(const cv::Mat& input_frame)
 
 	if (!eyes.empty()) {
 		// found eyes in the frame
+		
 		// increase the counter
 		eyes_counter++;
 		// write the data to csv
@@ -125,35 +141,23 @@ void Controller::process_frame(const cv::Mat& input_frame)
 	}
 }
 
+/***
+ * Calculating the fps and printing to console.
+ */
 void Controller::calculate_fps()
 {
 	using namespace std::chrono;
 
-	// static old time interval
-	static time_point<high_resolution_clock> old_time = high_resolution_clock::now();
-
 	// recalculate fps
 	fps = frames_processed_since_last_interval / print_fps_interval;
 
+
 	// check if passed {print_fps_interval} seconds, reset the time and print the fps / {print_fps_interval}
-	if (duration_cast<seconds>(high_resolution_clock::now() - old_time) >= seconds{ print_fps_interval }) {
-		old_time = high_resolution_clock::now();
+	if (duration_cast<seconds>(high_resolution_clock::now() - prev_time) >= seconds{ print_fps_interval }) {
 		std::cout << "FPS: " << fps << std::endl;
+		prev_time = high_resolution_clock::now();
 
-		// reset processed frames
+		// reset processed frames counter
 		frames_processed_since_last_interval = 0;
-	}
-}
-void Controller::processQueue()
-{
-	while (true) {
-		std::cout << std::this_thread::get_id() << ": try to pop" << std::endl;
-		const cv::Mat next_frame = queue.pop();
-		std::cout << std::this_thread::get_id() << ": popped successfully" << std::endl;
-
-		process_frame(next_frame);
-
-		if (finished_capture && queue.is_empty())	break;
-		
 	}
 }

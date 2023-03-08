@@ -11,10 +11,10 @@ public:
 	void extract_eyes_from_frame(const cv::Mat& input_frame, std::vector<cv::Mat>& output_eyes);
 
 private:
-	int detect_eyes(const cv::Mat&, std::vector<std::vector<cv::Point>>&);
+	int detect_eyes(const cv::Mat&, std::vector<std::array<cv::Point, 2>>&);
 	std::array<cv::Point, 4> compute_eye_rect(const cv::Point, const cv::Point, const double, const double) const;
 	cv::Mat align_and_crop_eyes(const cv::Mat&, const std::array<cv::Point, 4>&) const;
-	void extract_aligned_eye_rect(const cv::Mat&, std::vector<cv::Mat>&, const std::vector<cv::Point>&, int, const float = 0.05f) const;
+	void extract_aligned_eye_rect(const cv::Mat&, std::vector<cv::Mat>&, const std::array<cv::Point, 2>&, const float = 0.05f) const;
 
 
 	dlib::frontal_face_detector detector_;

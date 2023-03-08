@@ -4,14 +4,40 @@
 #include <condition_variable>
 #include <opencv2/opencv.hpp>
 
+
+
+/***
+ * Thread safe queue.
+ * Using mutex to lock the shared resource and prevent Producer-Consumer problem.
+ * Scalable - possible to use with multiple agents.
+ */
 class TSQueue
 {
 
 public:
 	TSQueue();
-	void push(cv::Mat data);
+
+	/***
+	* Push frame to the queue.
+	* @param frame to push.
+	*/
+	void push(cv::Mat& frame);
+
+	/***
+	* Pop first frame from the queue
+	* @return the popped frame
+	*/
 	cv::Mat pop();
-	bool is_empty();
+
+	/***
+	 * Check if the queue is empty.
+	 */
+	bool is_empty() const;
+
+	/***
+	 * Return number of frames in queue.
+	 */
+	int size() const;
 
 private:
 	std::queue<cv::Mat> queue;

@@ -13,26 +13,28 @@ ImageProcessor::ImageProcessor() {
 
 }
 
-
+/***
+ * Processing the frame and extracting the eyes.
+ * @param input_frame src.
+ * @param output_eyes dst.
+ */
 void ImageProcessor::extract_eyes_from_frame(const cv::Mat& input_frame, std::vector<cv::Mat>& output_eyes)
 {
-	//
-
-	std::vector<std::vector<cv::Point>> eyes;
+	// Two main steps:
+	// Step 1 - detect the eyes points from the frame
+	std::vector<std::array<cv::Point, 2>> eyes;
 	if (detect_eyes(input_frame, eyes) == 1)
 		return;
 
+	// Step 2 - calculate the aligned bounding box, rotate and crop.
 	output_eyes.clear();
-
 	for (const auto eye : eyes) {
 		extract_aligned_eye_rect(input_frame, output_eyes, eye, 1);
 	}
 
-
 }
 
-/* detect face landmarks using dlib 5 landmarks model
-*
+/**
 * dlib 5 facial landmarks legend:
 *
 * eyes[0] --> left
@@ -41,7 +43,13 @@ void ImageProcessor::extract_eyes_from_frame(const cv::Mat& input_frame, std::ve
 * eyes[i][1] -- interior point
 */
 
-int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::vector<cv::Point>>& eyes)
+/***
+ * Detects eyes landmarks using dlib models.
+ * @param frame src.
+ * @param eyes dst.
+ * @return 1 if face is not found
+ */
+int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::array<cv::Point, 2>>& eyes)
 {
 	// convert cv::Mat image to gray and to type dlib::cv_image
 	cv::Mat gray_frame;
@@ -73,10 +81,10 @@ int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::vector<cv
 	dlib::full_object_detection shape = shape_model_(dlib_image, face);
 
 
-	// arranging the coordinates in a vector<Point> for each eye
+	// arrange the coordinates in a vector<Point> for each eye
 	for (int i = 0; i <= 2; i += 2) {
 		eyes.push_back(
-			std::vector<cv::Point>(
+			std::array<cv::Point, 2>(
 				{
 					cv::Point(shape.part(i).x(), shape.part(i).y()),
 					cv::Point(shape.part(i + 1).x(), shape.part(i + 1).y())
@@ -86,7 +94,15 @@ int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::vector<cv
 
 	return 0;
 }
-void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<cv::Mat>& output_eyes, const std::vector<cv::Point>& single_eye_coordinates, int idx, const float inflate_rectangle_value) const
+
+/***
+* Extracting the aligned bounded rectangle points.
+* @param frame src.
+* @param output_eyes dst.
+* @param single_eye_coordinates vector of the eye points detected by dlib.
+* @param inflate_rectangle_value dx in percentage to inflate the rectangle.
+*/
+void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<cv::Mat>& output_eyes, const std::array<cv::Point, 2>& single_eye_coordinates, const float inflate_rectangle_value) const
 {
 	// To align the rectangle with the eye, we will do some math
 	// find the line between the two eye points --> l : y = mx + c
@@ -162,10 +178,8 @@ std::array<cv::Point, 4> ImageProcessor::compute_eye_rect(
 
 /***
  * Align and the crop the rectangle from original frame.
- *
  * @param frame src frame.
  * @param rect_points vector of 4 points representing eye rect.
-
  * @return aligned eye Mat.
  */
 cv::Mat ImageProcessor::align_and_crop_eyes(const cv::Mat& frame, const std::array<cv::Point, 4>& rect_points) const

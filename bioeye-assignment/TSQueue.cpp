@@ -1,41 +1,44 @@
 #include "TSQueue.h"
 
-TSQueue::TSQueue() : queue() {}
-
+TSQueue::TSQueue() = default;
 
 cv::Mat TSQueue::pop()
 {
-	std::cout << std::this_thread::get_id() << ": trying to pop" << std::endl;
-
+	// wait for lock
 	std::unique_lock<std::mutex> lock(m);
-	//while (queue.empty())
+
+	// the thread waits if the queue is empty
 	cv.wait(lock, [&]
 		{
 			return !queue.empty();
 		});
-	cv::Mat data = queue.front();
-	std::cout << std::this_thread::get_id() << ": popped" << std::endl;
 
+	// pop the first frame
+	cv::Mat frame = queue.front();
 	queue.pop();
-	return data;
+
+	return frame;
 }
 
-bool TSQueue::is_empty()
+void TSQueue::push(cv::Mat& frame)
 {
-
-	return queue.empty();
-}
-
-
-void TSQueue::push(cv::Mat data)
-{
-	std::cout << std::this_thread::get_id() << ": trying to push" << std::endl;
+	// wait for lock 
 	std::unique_lock<std::mutex> lock(m);
-	queue.push(data);
-	std::cout << std::this_thread::get_id() << ": pushed" << std::endl;
-
+	// push the frame 
+	queue.push(frame);
+	// unlock the queue
 	lock.unlock();
+	// wake the consumer
 	cv.notify_all();
 }
 
+bool TSQueue::is_empty() const
+{
+	return queue.empty();
+}
+
+int TSQueue::size() const
+{
+	return queue.size();
+}
 

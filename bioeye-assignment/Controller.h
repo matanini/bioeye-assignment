@@ -16,7 +16,7 @@ public:
 	void main_loop(int);
 	void calculate_fps();
 	void process_frame(const cv::Mat& input_frame);
-	void processQueue();
+	void process_queue();
 
 private:
 	double fps;
@@ -31,6 +31,7 @@ private:
 
 	time_t start_time_t;
 	std::chrono::time_point<std::chrono::system_clock> start_time_point, end_time_point;
+	std::chrono::time_point<std::chrono::high_resolution_clock> prev_time;
 
 	std::vector<cv::Mat> eyes;
 
