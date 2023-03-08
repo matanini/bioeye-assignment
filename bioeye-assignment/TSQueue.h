@@ -37,7 +37,7 @@ public:
 	/***
 	 * Return number of frames in queue.
 	 */
-	int size() const;
+	size_t size() const;
 
 private:
 	std::queue<cv::Mat> queue;

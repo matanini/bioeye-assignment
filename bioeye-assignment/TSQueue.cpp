@@ -37,7 +37,7 @@ bool TSQueue::is_empty() const
 	return queue.empty();
 }
 
-int TSQueue::size() const
+size_t TSQueue::size() const
 {
 	return queue.size();
 }
