@@ -1,10 +1,9 @@
 #include "TSQueue.h"
 
-template <class T>
-TSQueue<T>::TSQueue() : queue() {}
+TSQueue::TSQueue() : queue() {}
 
-template <class T>
-T TSQueue<T>::pop()
+
+cv::Mat TSQueue::pop()
 {
 	std::unique_lock<std::mutex> lock(m);
 	//while (queue.empty())
@@ -12,13 +11,13 @@ T TSQueue<T>::pop()
 		{
 			return !queue.empty();
 		});
-	T data = queue.front();
+	cv::Mat data = queue.front();
 	queue.pop();
 	return data;
 }
 
-template <class T>
-void TSQueue<T>::push(T data)
+
+void TSQueue::push(cv::Mat data)
 {
 	std::unique_lock<std::mutex> lock(m);
 	queue.push(data);

@@ -1,13 +1,15 @@
 #include "Controller.h"
+#include "TSQueue.h"
+
 #include <chrono>
 
-Controller::Controller(const long long sec)
+Controller::Controller(const long long sec) 
 {
 	frames_processed_since_last_interval = 0;
 	total_frames = 0;
 	eyes_counter = 0;
 	print_fps_interval = sec;
-
+	
 }
 
 Controller::~Controller()
@@ -31,6 +33,13 @@ void Controller::main_loop(const int target_fps)
 	cv::Mat frame;
 	std::map<int, cv::Mat> map;
 	bool achieved_target_fps = false;
+
+	const auto w = [this]
+	{
+		processQueue();
+	};
+	std::thread frame_processor(w);
+
 	while (true)
 	{
 		calculate_fps();
@@ -42,25 +51,29 @@ void Controller::main_loop(const int target_fps)
 		}
 		imshow("Video Stream", frame);
 
-		if (fps < target_fps)
-		{
-			if (!achieved_target_fps && total_frames > 60)
-			{
-				// After 2 seconds, if cant achieve target_fps, push to map and process later.
-				//map.insert({ total_frames, frame});
-				std::cout << "here" << std::endl;
-			}
-			else
-			{
-				process_frame(frame);
-			}
-			frames_processed_since_last_interval++;
-		}
-		if (fps >= target_fps && total_frames > 60)
-		{
-			// achieved target fps
-			achieved_target_fps = true;
-		}
+
+		queue.push(frame);
+		std::cout << "pushed" << std::endl;
+		//if (fps < target_fps)
+		//{
+		//	if (!achieved_target_fps && total_frames > 60)
+		//	{
+		//		// After 2 seconds, if cant achieve target_fps, push to map and process later.
+		//		//map.insert({ total_frames, frame});
+		//		std::cout << "here" << std::endl;
+		//	}
+
+		//	else
+		//	{
+		//		process_frame(frame);
+		//	}
+		//	frames_processed_since_last_interval++;
+		//}
+		//if (fps >= target_fps && total_frames > 60)
+		//{
+		//	// achieved target fps
+		//	achieved_target_fps = true;
+		//}
 
 		total_frames++;
 
@@ -74,7 +87,7 @@ void Controller::main_loop(const int target_fps)
 	// Clean up
 	cap.release();
 	cv::destroyAllWindows();
-
+	frame_processor.join();
 }
 
 void Controller::process_frame(const cv::Mat& input_frame)
@@ -123,5 +136,15 @@ void Controller::calculate_fps()
 
 		// reset processed frames
 		frames_processed_since_last_interval = 0;
+	}
+}
+void Controller::processQueue()
+{
+	while (true) {
+		std::cout << "try to pop" << std::endl;
+		const cv::Mat next_frame = queue.pop();
+		std::cout << "popped successfully" << std::endl;
+
+		process_frame(next_frame);
 	}
 }

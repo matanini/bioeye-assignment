@@ -1,13 +1,13 @@
 #pragma once
-#include <opencv2/opencv.hpp>
-
 #include "FileHandler.h"
 #include "ImageProcessor.h"
+#include "TSQueue.h"
+
+#include <opencv2/opencv.hpp>
 
 
 class Controller
 {
-
 public:
 	Controller(const long long);
 	~Controller();
@@ -16,7 +16,7 @@ public:
 	void main_loop(int);
 	void calculate_fps();
 	void process_frame(const cv::Mat& input_frame);
-
+	void processQueue();
 
 private:
 	double fps;
@@ -26,6 +26,7 @@ private:
 	cv::VideoCapture cap;
 	ImageProcessor processor;
 	FileHandler file_handler;
+	TSQueue queue;
 
 	time_t start_time_t;
 	std::chrono::time_point<std::chrono::system_clock> start_time_point, end_time_point;

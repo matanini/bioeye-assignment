@@ -2,17 +2,20 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <opencv2/opencv.hpp>
 
-template <class T>
 class TSQueue
 {
+
+public:
 	TSQueue();
-	void push(T data);
-	T pop();
+	void push(cv::Mat data);
+	cv::Mat pop();
 
 private:
-	std::queue<T> queue;
+	std::queue<cv::Mat> queue;
 	std::mutex m;
 	std::condition_variable cv;
+
 };
 
