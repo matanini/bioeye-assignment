@@ -149,16 +149,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\lib\dlib-19.24\dlib\all\source.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\lib\dlib-19.24\dlib\all\source.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="ImageProcessor.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TSQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Controller.h" />
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="ImageProcessor.h" />
+    <ClInclude Include="TSQueue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
