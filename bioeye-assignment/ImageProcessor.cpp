@@ -8,6 +8,7 @@
 
 
 ImageProcessor::ImageProcessor() {
+	// initialize dlib models
 	detector_ = dlib::get_frontal_face_detector();
 	dlib::deserialize(landmark_model_path_) >> shape_model_;
 
@@ -18,23 +19,35 @@ ImageProcessor::ImageProcessor() {
  * @param input_frame src.
  * @param output_eyes dst.
  */
-void ImageProcessor::extract_eyes_from_frame(const cv::Mat& input_frame, std::vector<cv::Mat>& output_eyes)
+void ImageProcessor::process_frame(const cv::Mat& input_frame, std::vector<cv::Mat>& output_eyes)
 {
-	// Two main steps:
-	// Step 1 - detect the eyes points from the frame
+
+	// detect the eyes points from the frame
 	std::vector<std::array<cv::Point, 2>> eyes;
 	if (detect_eyes(input_frame, eyes) == 1)
 		return;
 
-	// Step 2 - calculate the aligned bounding box, rotate and crop.
 	output_eyes.clear();
 	for (const auto eye : eyes) {
-		extract_aligned_eye_rect(input_frame, output_eyes, eye);
-	}
+		// for each eye
+		// calculate the information for the bounding box
+		const aligned_rectangle_info rect = extract_rect_info(eye);
 
+		// calculate the bounding box points
+		const std::array<cv::Point, 4> rect_points = compute_eye_rect(
+			rect.left_point, 
+			rect.right_point, 
+			rect.distance, 
+			rect.n
+		);
+
+		// crop the eye rectangle from the frame
+		const cv::Mat cropped_image = align_and_crop_eye(input_frame, rect_points);
+		output_eyes.push_back(cropped_image);
+	}
 }
 
-/**
+/*
 * dlib 5 facial landmarks legend:
 *
 * eyes[0] --> left
@@ -97,12 +110,10 @@ int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::array<cv:
 
 /***
 * Extracting the aligned bounded rectangle points.
-* @param frame src.
-* @param output_eyes dst.
 * @param single_eye_coordinates vector of the eye points detected by dlib.
-* @param inflate_rectangle_value dx in percentage to inflate the rectangle.
+* @return aligned_rectangle_info struct
 */
-void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<cv::Mat>& output_eyes, const std::array<cv::Point, 2>& single_eye_coordinates, const double inflate_rectangle_value) const
+aligned_rectangle_info ImageProcessor::extract_rect_info(const std::array<cv::Point, 2>& single_eye_coordinates) const
 {
 	// To align the rectangle with the eye, we will do some math
 	// find the line between the two eye points --> l : y = mx + c
@@ -130,13 +141,13 @@ void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<
 
 	const double n = -1 / m;
 
-	// compute the eye square with distance param as width and height
-	const std::array<cv::Point, 4> rect_points = compute_eye_rect(left_point, right_point, distance, n);
+	return {
+	left_point,
+	right_point,
+	distance,
+	n
+	};
 
-	// crop the eye rectangle from the frame
-	const cv::Mat cropped_image = align_and_crop_eyes(frame, rect_points);
-
-	output_eyes.push_back(cropped_image);
 }
 /***
  * Computes 4 points of the eye square.
@@ -182,7 +193,7 @@ std::array<cv::Point, 4> ImageProcessor::compute_eye_rect(
  * @param rect_points vector of 4 points representing eye rect.
  * @return aligned eye Mat.
  */
-cv::Mat ImageProcessor::align_and_crop_eyes(const cv::Mat& frame, const std::array<cv::Point, 4>& rect_points) const
+cv::Mat ImageProcessor::align_and_crop_eye(const cv::Mat& frame, const std::array<cv::Point, 4>& rect_points) const
 {
 	// retrieve the minimum bounding rectangle around the eye
 	const cv::RotatedRect rect = minAreaRect(rect_points);
