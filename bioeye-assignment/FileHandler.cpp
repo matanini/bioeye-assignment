@@ -25,6 +25,7 @@ void FileHandler::write_to_csv(const int frame_number, const time_t* start_time,
 	const std::string start = parse_time(localtime(start_time));
 	data_file_ << frame_number << "," << start << "," << duration << "," << face_detected << std::endl;
 }
+
 void FileHandler::close_file()
 {
 	data_file_.close();
@@ -42,7 +43,6 @@ void FileHandler::save_image(std::vector<cv::Mat> eyes, const int frame_number)
 		}
 		imwrite(img_directory_ + filename, eyes[i]);
 	}
-
 
 }
 

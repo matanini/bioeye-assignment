@@ -29,6 +29,8 @@ void Controller::init()
 void Controller::main_loop(const int target_fps)
 {
 	cv::Mat frame;
+	std::map<int, cv::Mat> map;
+	bool achieved_target_fps = false;
 	while (true)
 	{
 		calculate_fps();
@@ -42,8 +44,22 @@ void Controller::main_loop(const int target_fps)
 
 		if (fps < target_fps)
 		{
-			process_frame(frame);
+			if (!achieved_target_fps && total_frames > 60)
+			{
+				// After 2 seconds, if cant achieve target_fps, push to map and process later.
+				//map.insert({ total_frames, frame});
+				std::cout << "here" << std::endl;
+			}
+			else
+			{
+				process_frame(frame);
+			}
 			frames_processed_since_last_interval++;
+		}
+		if (fps >= target_fps && total_frames > 60)
+		{
+			// achieved target fps
+			achieved_target_fps = true;
 		}
 
 		total_frames++;

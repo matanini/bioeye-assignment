@@ -67,8 +67,8 @@ int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::vector<cv
 		faces[0].bottom() / scale_factor
 	);
 
-	//cv::Point tl(face.left(), face.top()), br(face.right(), face.bottom());
-	//cv::rectangle(frame, tl,br, cv::Scalar(255, 0, 255));
+	cv::Point tl(face.left(), face.top()), br(face.right(), face.bottom());
+	cv::rectangle(frame, tl,br, cv::Scalar(255, 0, 255));
 	dlib::full_object_detection shape = shape_model_(dlib_image, face);
 
 
@@ -122,10 +122,10 @@ void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<
 	//std::cout << "aligned and cropped at " << t.peek() << std::endl;
 
 	// draw rectangle in frame
-	//cv::line(frame, rect_points[0], rect_points[1], cv::Scalar(255, 0, 255), 1);
-	//cv::line(frame, rect_points[3], rect_points[1], cv::Scalar(255, 0, 255), 1);
-	//cv::line(frame, rect_points[2], rect_points[0], cv::Scalar(255, 0, 255), 1);
-	//cv::line(frame, rect_points[2], rect_points[3], cv::Scalar(255, 0, 255), 1);
+	cv::line(frame, rect_points[0], rect_points[1], cv::Scalar(255, 0, 255), 1);
+	cv::line(frame, rect_points[3], rect_points[1], cv::Scalar(255, 0, 255), 1);
+	cv::line(frame, rect_points[2], rect_points[0], cv::Scalar(255, 0, 255), 1);
+	cv::line(frame, rect_points[2], rect_points[3], cv::Scalar(255, 0, 255), 1);
 
 	output_eyes.push_back(cropped_image);
 }
