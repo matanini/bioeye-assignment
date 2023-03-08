@@ -22,6 +22,7 @@ private:
 	double fps;
 	long long print_fps_interval;
 	int frames_processed_since_last_interval, total_frames, eyes_counter;
+	bool finished_capture = false;
 
 	cv::VideoCapture cap;
 	ImageProcessor processor;

@@ -46,20 +46,22 @@ int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::vector<cv
 	// convert cv::Mat image to gray and to type dlib::cv_image
 	cv::Mat gray_frame;
 	cvtColor(frame, gray_frame, cv::COLOR_BGR2GRAY);
+	const dlib::cv_image<unsigned char> dlib_image(gray_frame);
 
-
+	// scale down the frame for detector optimization
 	cv::Mat resized;
 	cv::resize(gray_frame, resized, cv::Size(0, 0), scale_factor, scale_factor);
-
-	const dlib::cv_image<unsigned char> dlib_image_resized(resized), dlib_image(gray_frame);
+	const dlib::cv_image<unsigned char> dlib_image_resized(resized);
 
 	// detect faces in frame using dlib face detector
 	const std::vector<dlib::rectangle> faces = detector_(dlib_image_resized);
 
 	if (faces.empty())
+		// no faces found
 		return 1;
 
 
+	// scale back the rectangle received from face detector to original frame size
 	const dlib::rectangle face(
 		faces[0].left() / scale_factor,
 		faces[0].top() / scale_factor,
@@ -67,13 +69,12 @@ int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::vector<cv
 		faces[0].bottom() / scale_factor
 	);
 
-	cv::Point tl(face.left(), face.top()), br(face.right(), face.bottom());
-	cv::rectangle(frame, tl,br, cv::Scalar(255, 0, 255));
+	// detect face landmarks with dlib 5 facial landmarks model
 	dlib::full_object_detection shape = shape_model_(dlib_image, face);
 
 
+	// arranging the coordinates in a vector<Point> for each eye
 	for (int i = 0; i <= 2; i += 2) {
-		// arranging the coordinates in a vector<Point> for each eye
 		eyes.push_back(
 			std::vector<cv::Point>(
 				{
@@ -115,17 +116,9 @@ void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<
 
 	// compute the eye square with distance param as width and height
 	const std::array<cv::Point, 4> rect_points = compute_eye_rect(left_point, right_point, distance, n);
-	//std::cout << "eyes rect computed at " << t.peek() << std::endl;
 
 	// crop the eye rectangle from the frame
 	const cv::Mat cropped_image = align_and_crop_eyes(frame, rect_points);
-	//std::cout << "aligned and cropped at " << t.peek() << std::endl;
-
-	// draw rectangle in frame
-	cv::line(frame, rect_points[0], rect_points[1], cv::Scalar(255, 0, 255), 1);
-	cv::line(frame, rect_points[3], rect_points[1], cv::Scalar(255, 0, 255), 1);
-	cv::line(frame, rect_points[2], rect_points[0], cv::Scalar(255, 0, 255), 1);
-	cv::line(frame, rect_points[2], rect_points[3], cv::Scalar(255, 0, 255), 1);
 
 	output_eyes.push_back(cropped_image);
 }
@@ -159,13 +152,12 @@ std::array<cv::Point, 4> ImageProcessor::compute_eye_rect(
 		delta = cv::Point(0, r);
 	}
 
-	cv::Point p1 = left_point - delta;
-	cv::Point p2 = left_point + delta;
-	cv::Point p3 = right_point - delta;
-	cv::Point p4 = right_point + delta;
-	//std::cout << "p1: "<< p1 << ",p2: " << p2 << ",p3: " << p3 << ",p4: " << p4 << std::endl;
-
-	return { p1,p2,p3,p4 };
+	return {
+		left_point - delta,
+		left_point + delta,
+		right_point - delta,
+		right_point + delta
+	};
 }
 
 /***

@@ -11,6 +11,7 @@ public:
 	TSQueue();
 	void push(cv::Mat data);
 	cv::Mat pop();
+	bool is_empty();
 
 private:
 	std::queue<cv::Mat> queue;

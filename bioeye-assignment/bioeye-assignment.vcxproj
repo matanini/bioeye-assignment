@@ -149,7 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\lib\dlib-19.24\dlib\all\source.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\lib\dlib-19.24\dlib\all\source.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="ImageProcessor.cpp" />

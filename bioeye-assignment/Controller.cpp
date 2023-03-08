@@ -53,7 +53,7 @@ void Controller::main_loop(const int target_fps)
 
 
 		queue.push(frame);
-		std::cout << "pushed" << std::endl;
+		
 		//if (fps < target_fps)
 		//{
 		//	if (!achieved_target_fps && total_frames > 60)
@@ -84,10 +84,16 @@ void Controller::main_loop(const int target_fps)
 		}
 	}
 
+	finished_capture = true;
+
+	
+
 	// Clean up
 	cap.release();
 	cv::destroyAllWindows();
+
 	frame_processor.join();
+	
 }
 
 void Controller::process_frame(const cv::Mat& input_frame)
@@ -141,10 +147,13 @@ void Controller::calculate_fps()
 void Controller::processQueue()
 {
 	while (true) {
-		std::cout << "try to pop" << std::endl;
+		std::cout << std::this_thread::get_id() << ": try to pop" << std::endl;
 		const cv::Mat next_frame = queue.pop();
-		std::cout << "popped successfully" << std::endl;
+		std::cout << std::this_thread::get_id() << ": popped successfully" << std::endl;
 
 		process_frame(next_frame);
+
+		if (finished_capture && queue.is_empty())	break;
+		
 	}
 }

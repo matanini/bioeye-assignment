@@ -20,5 +20,5 @@ private:
 	dlib::frontal_face_detector detector_;
 	dlib::shape_predictor shape_model_;
 	std::string landmark_model_path_ = "resources/shape_predictor_5_face_landmarks.dat";
-	float scale_factor = 0.35f;
+	float scale_factor = 0.4f;
 };
