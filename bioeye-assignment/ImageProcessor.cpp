@@ -29,7 +29,7 @@ void ImageProcessor::extract_eyes_from_frame(const cv::Mat& input_frame, std::ve
 	// Step 2 - calculate the aligned bounding box, rotate and crop.
 	output_eyes.clear();
 	for (const auto eye : eyes) {
-		extract_aligned_eye_rect(input_frame, output_eyes, eye, 1);
+		extract_aligned_eye_rect(input_frame, output_eyes, eye);
 	}
 
 }
@@ -102,7 +102,7 @@ int ImageProcessor::detect_eyes(const cv::Mat& frame, std::vector<std::array<cv:
 * @param single_eye_coordinates vector of the eye points detected by dlib.
 * @param inflate_rectangle_value dx in percentage to inflate the rectangle.
 */
-void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<cv::Mat>& output_eyes, const std::array<cv::Point, 2>& single_eye_coordinates, const float inflate_rectangle_value) const
+void ImageProcessor::extract_aligned_eye_rect(const cv::Mat& frame, std::vector<cv::Mat>& output_eyes, const std::array<cv::Point, 2>& single_eye_coordinates, const double inflate_rectangle_value) const
 {
 	// To align the rectangle with the eye, we will do some math
 	// find the line between the two eye points --> l : y = mx + c
