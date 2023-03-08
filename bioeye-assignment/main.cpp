@@ -3,8 +3,8 @@
 int main()
 {
 	// declare the controller
-	constexpr long long print_fps_interval = 2;
-	constexpr int target_fps = 25;
+	constexpr long long print_fps_interval = 5;
+	constexpr int target_fps = 30;
 
 	Controller controller(print_fps_interval);
 

@@ -61,7 +61,6 @@ void Controller::main_loop(const int target_fps)
 		if (fps < target_fps)
 		{
 			queue.push(frame);
-			frames_processed_since_last_interval++;
 			total_frames++;
 		}
 
@@ -82,6 +81,7 @@ void Controller::main_loop(const int target_fps)
 	cv::destroyAllWindows();
 
 	// wait for processor thread to finish
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	frame_processor_thread.join();
 	
 }
@@ -100,6 +100,8 @@ void Controller::process_queue()
 		// process the frame
 		process_frame(next_frame);
 
+		frames_processed_since_last_interval++;
+
 		// stop the loop if finished capture and queue is empty
 		if (finished_capture && queue.is_empty())	break;
 
@@ -115,7 +117,7 @@ void Controller::process_frame(const cv::Mat& input_frame)
 {
 	// extract 2 eye cv::Mat in a vector 
 	start_time_point = std::chrono::system_clock::now();
-	processor.extract_eyes_from_frame(input_frame, eyes);
+	processor.process_frame(input_frame, eyes);
 
 	// measure processing performance 
 	end_time_point = std::chrono::system_clock::now();
