@@ -5,7 +5,9 @@
 
 #include <opencv2/opencv.hpp>
 
-
+/***
+ * Controller class.
+ */
 class Controller
 {
 public:

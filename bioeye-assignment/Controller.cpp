@@ -113,17 +113,19 @@ void Controller::process_queue()
  */
 void Controller::process_frame(const cv::Mat& input_frame)
 {
-	// extract 2 eye cv::Mat in a vector and measure performance
+	// extract 2 eye cv::Mat in a vector 
 	start_time_point = std::chrono::system_clock::now();
 	processor.extract_eyes_from_frame(input_frame, eyes);
+
+	// measure processing performance 
 	end_time_point = std::chrono::system_clock::now();
 	const std::chrono::duration<double> duration = end_time_point - start_time_point;
+
 
 	start_time_t = std::chrono::system_clock::to_time_t(start_time_point);
 
 	if (!eyes.empty()) {
 		// found eyes in the frame
-		
 		// increase the counter
 		eyes_counter++;
 		// write the data to csv

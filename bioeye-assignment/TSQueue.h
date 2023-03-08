@@ -7,7 +7,7 @@
 
 
 /***
- * Thread safe queue.
+ * Thread safe unbuffered queue.
  * Using mutex to lock the shared resource and prevent Producer-Consumer problem.
  * Scalable - possible to use with multiple agents.
  */
