@@ -3,10 +3,13 @@
 
 #include <chrono>
 
-Controller::Controller(const long long sec) 
+Controller::Controller(const long long sec) :
+	fps(0),
+	frames_processed_since_last_interval(0),
+	eyes_counter(0),
+	print_fps_interval(sec),
+	finished_capture(false)
 {
-	frames_processed_since_last_interval = eyes_counter = 0;
-	print_fps_interval = sec;
 }
 
 Controller::~Controller()
@@ -31,16 +34,17 @@ void Controller::main_loop(const int target_fps)
 	std::cout << "Starting main loop with target fps:" << target_fps << std::endl;
 
 	// declare lambda function to run in the processor thread
-	const auto w = [this]
+	const auto process_lambda = [this]
 	{
 		process_queue();
 	};
-	std::thread frame_processor_thread(w);
+	std::thread frame_processor_thread(process_lambda);;
 
 
 	cv::Mat frame;
 	int total_frames = 0;
 
+	// get starting time for fps calculations
 	prev_time = std::chrono::high_resolution_clock::now();
 
 	// main loop 
@@ -59,10 +63,11 @@ void Controller::main_loop(const int target_fps)
 		// show the frames 
 		imshow("Video Stream", frame);
 
-		// if target fps is greater than processing fps
 		if (fps < target_fps)
 		{
-			queue.push( total_frames++, frame );
+			// if target fps is greater than processing fps,
+			// push the frame to queue and increment frame number
+			queue.push( ++total_frames, frame );
 		}
 
 
