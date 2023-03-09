@@ -27,10 +27,10 @@
     <ClCompile Include="Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\lib\dlib-19.24\dlib\all\source.cpp">
+    <ClCompile Include="TSQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TSQueue.cpp">
+    <ClCompile Include="..\..\..\..\..\..\lib\dlib-19.24\dlib\all\source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
