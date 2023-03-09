@@ -17,28 +17,11 @@ class TSQueue
 public:
 	TSQueue();
 
-	/***
-	* Push frame to the queue.
-	* @param frame_number to maintain order.
-	* @param frame to push.
-	*/
 	void push(int frame_number, cv::Mat& frame);
-
-	/***
-	* Pop first frame from the queue
-	* @return the popped frame
-	*/
 	std::pair<int, cv::Mat> pop();
 
-	/***
-	 * Check if the queue is empty.
-	 */
-	bool is_empty() const;
-
-	/***
-	 * Return number of frames in queue.
-	 */
-	size_t size() const;
+	[[nodiscard]] bool is_empty() const;
+	
 
 private:
 	std::queue<std::pair<int,cv::Mat>> queue;

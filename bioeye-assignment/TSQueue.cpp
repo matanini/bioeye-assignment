@@ -2,6 +2,10 @@
 
 TSQueue::TSQueue() = default;
 
+/***
+ * Pop first frame from the queue
+ * @return the popped frame
+ */
 std::pair<int, cv::Mat> TSQueue::pop()
 {
 	// wait for lock
@@ -20,6 +24,11 @@ std::pair<int, cv::Mat> TSQueue::pop()
 	return frame;
 }
 
+/***
+ * Push frame to the queue.
+ * @param frame_number to maintain order.
+ * @param frame to push.
+ */
 void TSQueue::push(int frame_number, cv::Mat& frame)
 {
 	// wait for lock 
@@ -32,13 +41,11 @@ void TSQueue::push(int frame_number, cv::Mat& frame)
 	cv.notify_all();
 }
 
+/***
+ * Check if the queue is empty.
+ */
 bool TSQueue::is_empty() const
 {
 	return queue.empty();
-}
-
-size_t TSQueue::size() const
-{
-	return queue.size();
 }
 

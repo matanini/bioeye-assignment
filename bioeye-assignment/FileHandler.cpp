@@ -3,6 +3,10 @@
 #include <opencv2/opencv.hpp>
 #include <filesystem>
 
+/***
+ * Function to check if path exists as dir.
+ * @param path to check.
+ */
 void check_dir_and_create(const char* path)
 {
 	namespace fs = std::filesystem;
@@ -33,6 +37,13 @@ FileHandler::~FileHandler()
 	close_file();
 }
 
+/***
+ * Write data to csv file.
+ * @param frame_number unique frame id.
+ * @param start_time start processing time.
+ * @param duration total duration of processing.
+ * @param face_detected bool is face detected.
+ */
 void FileHandler::write_to_csv(const int frame_number, const time_t* start_time, const double duration, const bool face_detected)
 {
 	// parsing time_t obj to string
@@ -44,6 +55,11 @@ void FileHandler::close_file()
 {
 	data_file_.close();
 }
+/***
+ * Saves two images to folder.
+ * @param eyes vector of two eyes.
+ * @param frame_number unique frame id.
+ */
 void FileHandler::save_image(std::vector<cv::Mat> eyes, const int frame_number) const
 {
 	// for both eyes in the vector
@@ -62,11 +78,13 @@ void FileHandler::save_image(std::vector<cv::Mat> eyes, const int frame_number) 
 	}
 
 }
-
+/***
+ * Parsing tm* obj to a meaningful string.
+ * Format is "year-month-day-hour-minute-second".
+ * @param time time object to parse.
+ */
 std::string FileHandler::parse_time(const tm* time)
 {
-	// parsing tm* obj to a meaningful string
-	// format is "year-month-day-hour-minute-second"
 
 	char buffer[30];
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d-%H-%M-%S", time);

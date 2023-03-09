@@ -7,18 +7,20 @@
 struct aligned_rectangle_info
 {
 	cv::Point left_point, right_point;
-	double distance, n;
+	double distance, gradient;
 };
-
+/***
+ * Class to perform the processing operations on an input frame.
+ */
 class ImageProcessor {
 public:
 	ImageProcessor();
 	void process_frame(const cv::Mat& input_frame, std::vector<cv::Mat>& output_eyes);
 
 private:
-	int detect_eyes(const cv::Mat&, std::vector<std::array<cv::Point, 2>>&);
-	std::array<cv::Point, 4> compute_eye_rect(const cv::Point, const cv::Point, const double, const double) const;
-	cv::Mat align_and_crop_eye(const cv::Mat&, const std::array<cv::Point, 4>&) const;
+	int detect_eyes(const cv::Mat& frame, std::vector<std::array<cv::Point, 2>>& eyes);
+	std::array<cv::Point, 4> compute_eye_rect(const cv::Point left_point, const cv::Point right_point, const double distance, const double gradient) const;
+	cv::Mat align_and_crop_eye(const cv::Mat& frame, const std::array<cv::Point, 4>& rect_points) const;
 	aligned_rectangle_info extract_rect_info(const std::array<cv::Point, 2>& single_eye_coordinates) const;
 
 

@@ -38,7 +38,7 @@ void ImageProcessor::process_frame(const cv::Mat& input_frame, std::vector<cv::M
 			rect.left_point, 
 			rect.right_point, 
 			rect.distance, 
-			rect.n
+			rect.gradient
 		);
 
 		// crop the eye rectangle from the frame

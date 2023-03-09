@@ -3,11 +3,15 @@
 
 #include <chrono>
 
-Controller::Controller(const long long sec) :
+/***
+ * Constructor
+ * @param interval interval in seconds to print fps to console.
+ */
+Controller::Controller(const long long interval) :
 	fps(0),
 	frames_processed_since_last_interval(0),
 	eyes_counter(0),
-	print_fps_interval(sec),
+	print_fps_interval(interval),
 	finished_capture(false)
 {
 }
@@ -18,6 +22,9 @@ Controller::~Controller()
 	file_handler.close_file();
 }
 
+/***
+ * Init of Controller.
+ */
 void Controller::init()
 {
 	// video capture initialization
@@ -29,6 +36,10 @@ void Controller::init()
 	}
 }
 
+/***
+ * Main loop to start application.
+ * @param target_fps target fps.
+ */
 void Controller::main_loop(const int target_fps)
 {
 	std::cout << "Starting main loop with target fps:" << target_fps << std::endl;

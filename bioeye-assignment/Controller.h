@@ -11,11 +11,11 @@
 class Controller
 {
 public:
-	Controller(const long long);
+	Controller(const long long interval);
 	~Controller();
 
 	void init();
-	void main_loop(int);
+	void main_loop(int target_fps);
 	void calculate_fps();
 	void process_frame(const cv::Mat& input_frame, int frame_number);
 	void process_queue();

@@ -3,6 +3,9 @@
 #include <ctime>
 #include <opencv2/opencv.hpp>
 
+/***
+ * Class to handle all the files operations.
+ */
 class FileHandler {
 
 public:
@@ -10,9 +13,9 @@ public:
 	~FileHandler();
 
 	void close_file();
-	void write_to_csv(const int, const time_t*, const double, const bool);
-	void save_image(std::vector<cv::Mat>, const int) const;
-	static std::string parse_time(const tm*);
+	void write_to_csv(const int frame_number, const time_t* start_time, const double duration, const bool face_detected);
+	void save_image(std::vector<cv::Mat> eyes, const int frame_number) const;
+	static std::string parse_time(const tm* time);
 
 private:
 	std::ofstream data_file_;
