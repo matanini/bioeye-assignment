@@ -23,8 +23,8 @@ The application saves a CSV file containing the following data for each frame:
 In addition to the CSV, the application saves both eyes every 30 frames in which face was detected.  
 The image name format is ``` {left/right}_{frame_number}.png```.
 
-The CSV file is saved in ```.\data``` dir.  
-The images are saved in ```.\data\img``` dir.  
+The CSV file is saved in ```./data``` dir.  
+The images are saved in ```./data/img``` dir.  
 
 
 ## Requirements
@@ -32,5 +32,5 @@ The images are saved in ```.\data\img``` dir.
 - dlib library
 - OpenCV library
 
-In this solution both additional libraries installed in ```"C:\lib\"```  .
-
+In this solution both additional libraries installed in ```"C:\lib\"```  .  
+Make sure to include ```/dlib/all/source.cpp``` to the project as exsiting file.
