@@ -2,7 +2,7 @@
 
 TSQueue::TSQueue() = default;
 
-cv::Mat TSQueue::pop()
+std::pair<int, cv::Mat> TSQueue::pop()
 {
 	// wait for lock
 	std::unique_lock<std::mutex> lock(m);
@@ -14,18 +14,18 @@ cv::Mat TSQueue::pop()
 		});
 
 	// pop the first frame
-	cv::Mat frame = queue.front();
+	std::pair<int, cv::Mat> frame = queue.front();
 	queue.pop();
 
 	return frame;
 }
 
-void TSQueue::push(cv::Mat& frame)
+void TSQueue::push(int frame_number, cv::Mat& frame)
 {
 	// wait for lock 
 	std::unique_lock<std::mutex> lock(m);
 	// push the frame 
-	queue.push(frame);
+	queue.push({ frame_number,frame });
 	// unlock the queue
 	lock.unlock();
 	// wake the consumer

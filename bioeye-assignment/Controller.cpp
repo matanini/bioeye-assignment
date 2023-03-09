@@ -5,7 +5,7 @@
 
 Controller::Controller(const long long sec) 
 {
-	frames_processed_since_last_interval = total_frames = eyes_counter = 0;
+	frames_processed_since_last_interval = eyes_counter = 0;
 	print_fps_interval = sec;
 }
 
@@ -39,6 +39,8 @@ void Controller::main_loop(const int target_fps)
 
 
 	cv::Mat frame;
+	int total_frames = 0;
+
 	prev_time = std::chrono::high_resolution_clock::now();
 
 	// main loop 
@@ -60,8 +62,7 @@ void Controller::main_loop(const int target_fps)
 		// if target fps is greater than processing fps
 		if (fps < target_fps)
 		{
-			queue.push(frame);
-			total_frames++;
+			queue.push( total_frames++, frame );
 		}
 
 
@@ -95,10 +96,10 @@ void Controller::process_queue()
 	std::cout << "Processing thread came alive" << std::endl;
 	while (true) {
 		// pop next frame from the queue
-		const cv::Mat next_frame = queue.pop();
+		const std::pair<int,cv::Mat> next_frame = queue.pop();
 
 		// process the frame
-		process_frame(next_frame);
+		process_frame(next_frame.second, next_frame.first);
 
 		frames_processed_since_last_interval++;
 
@@ -112,8 +113,9 @@ void Controller::process_queue()
 /***
  * Processing the frame.
  * @param input_frame src.
+ * @param frame_number to maintain order.
  */
-void Controller::process_frame(const cv::Mat& input_frame)
+void Controller::process_frame(const cv::Mat& input_frame, int frame_number)
 {
 	// extract 2 eye cv::Mat in a vector 
 	start_time_point = std::chrono::system_clock::now();
@@ -131,17 +133,17 @@ void Controller::process_frame(const cv::Mat& input_frame)
 		// increase the counter
 		eyes_counter++;
 		// write the data to csv
-		file_handler.write_to_csv(total_frames, &start_time_t, duration.count(), true);
+		file_handler.write_to_csv(frame_number, &start_time_t, duration.count(), true);
 
 		if (eyes_counter % 30 == 0)
 			// save the image every 30 instances
-			file_handler.save_image(eyes, total_frames);
+			file_handler.save_image(eyes, frame_number);
 	}
 
 	else {
 		// did not find eyes in frame
 		// write the data to csv
-		file_handler.write_to_csv(total_frames, &start_time_t, duration.count(), false);
+		file_handler.write_to_csv(frame_number, &start_time_t, duration.count(), false);
 	}
 }
 
@@ -153,7 +155,7 @@ void Controller::calculate_fps()
 	using namespace std::chrono;
 
 	// recalculate fps
-	fps = frames_processed_since_last_interval / print_fps_interval;
+	fps = static_cast<double>(frames_processed_since_last_interval) / print_fps_interval;
 
 
 	// check if passed {print_fps_interval} seconds, reset the time and print the fps / {print_fps_interval}

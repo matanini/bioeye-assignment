@@ -19,15 +19,16 @@ public:
 
 	/***
 	* Push frame to the queue.
+	* @param frame_number to maintain order.
 	* @param frame to push.
 	*/
-	void push(cv::Mat& frame);
+	void push(int frame_number, cv::Mat& frame);
 
 	/***
 	* Pop first frame from the queue
 	* @return the popped frame
 	*/
-	cv::Mat pop();
+	std::pair<int, cv::Mat> pop();
 
 	/***
 	 * Check if the queue is empty.
@@ -40,7 +41,7 @@ public:
 	size_t size() const;
 
 private:
-	std::queue<cv::Mat> queue;
+	std::queue<std::pair<int,cv::Mat>> queue;
 	std::mutex m;
 	std::condition_variable cv;
 

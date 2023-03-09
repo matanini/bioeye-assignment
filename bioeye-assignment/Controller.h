@@ -17,13 +17,13 @@ public:
 	void init();
 	void main_loop(int);
 	void calculate_fps();
-	void process_frame(const cv::Mat& input_frame);
+	void process_frame(const cv::Mat& input_frame, int frame_number);
 	void process_queue();
 
 private:
 	double fps;
 	long long print_fps_interval;
-	int frames_processed_since_last_interval, total_frames, eyes_counter;
+	int frames_processed_since_last_interval, eyes_counter;
 	bool finished_capture = false;
 
 	cv::VideoCapture cap;
